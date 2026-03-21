@@ -1,0 +1,27 @@
+# Compilados Java/Maven
+target/
+*.jar
+*.war
+*.class
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+
+# Spring Boot
+*.log
+logs/
+
+# IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
