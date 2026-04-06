@@ -1,19 +1,19 @@
-package com.empresa.sistema_compras.modules.venta;
+package com.empresa.sistema_compras.modules.compra;
 
 import com.empresa.sistema_compras.modules.producto.Producto;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "detalle_venta")
-public class DetalleVenta {
+@Table(name = "detalle_compra")
+public class DetalleCompra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "venta_id")
-    private Venta venta;
+    @JoinColumn(name = "compra_id")
+    private Compra compra;
 
     @ManyToOne
     @JoinColumn(name = "producto_id")
@@ -25,8 +25,8 @@ public class DetalleVenta {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public Venta getVenta() { return venta; }
-    public void setVenta(Venta venta) { this.venta = venta; }
+    public Compra getCompra() { return compra; }
+    public void setCompra(Compra compra) { this.compra = compra; }
     public Producto getProducto() { return producto; }
     public void setProducto(Producto producto) { this.producto = producto; }
     public Integer getCantidad() { return cantidad; }

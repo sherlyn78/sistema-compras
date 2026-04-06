@@ -8,9 +8,8 @@ target/
 .mvn/wrapper/maven-wrapper.jar
 
 # Variables de entorno
-.env
-.env.local
-.env.production
+application-local.properties
+
 
 # Spring Boot
 *.log

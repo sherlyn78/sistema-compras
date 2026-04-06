@@ -1,1 +1,91 @@
-<p>dashboard works!</p>
+<div class="flex h-screen bg-gray-100">
+
+  <!-- Menú lateral -->
+  <div class="w-64 bg-gray-800 text-white flex flex-col">
+    <div class="p-6 border-b border-gray-700">
+      <h1 class="text-lg font-bold">Sistema de Compras</h1>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1">
+      <button (click)="cambiarSeccion('inicio')"
+        [class]="seccionActiva === 'inicio' ? 'w-full text-left px-4 py-2 rounded bg-blue-600 text-white' : 'w-full text-left px-4 py-2 rounded hover:bg-gray-700 text-gray-300'">
+        Inicio
+      </button>
+      <button (click)="cambiarSeccion('usuarios')"
+        [class]="seccionActiva === 'usuarios' ? 'w-full text-left px-4 py-2 rounded bg-blue-600 text-white' : 'w-full text-left px-4 py-2 rounded hover:bg-gray-700 text-gray-300'">
+        Usuarios
+      </button>
+      <button (click)="cambiarSeccion('productos')"
+        [class]="seccionActiva === 'productos' ? 'w-full text-left px-4 py-2 rounded bg-blue-600 text-white' : 'w-full text-left px-4 py-2 rounded hover:bg-gray-700 text-gray-300'">
+        Productos
+      </button>
+      <button (click)="cambiarSeccion('compras')"
+        [class]="seccionActiva === 'compras' ? 'w-full text-left px-4 py-2 rounded bg-blue-600 text-white' : 'w-full text-left px-4 py-2 rounded hover:bg-gray-700 text-gray-300'">
+        Compras
+      </button>
+      <button (click)="cambiarSeccion('ventas')"
+        [class]="seccionActiva === 'ventas' ? 'w-full text-left px-4 py-2 rounded bg-blue-600 text-white' : 'w-full text-left px-4 py-2 rounded hover:bg-gray-700 text-gray-300'">
+        Ventas
+      </button>
+    </nav>
+
+    <div class="p-4 border-t border-gray-700">
+      <button (click)="cerrarSesion()"
+        class="w-full text-left px-4 py-2 rounded hover:bg-red-600 text-gray-300 transition">
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="flex-1 overflow-auto p-8">
+
+    <!-- Inicio -->
+    <div *ngIf="seccionActiva === 'inicio'">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Bienvenido al sistema</h2>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg p-6 shadow-sm border">
+          <h3 class="text-gray-500 text-sm">Módulo</h3>
+          <p class="text-xl font-bold text-gray-800 mt-1">Usuarios</p>
+        </div>
+        <div class="bg-white rounded-lg p-6 shadow-sm border">
+          <h3 class="text-gray-500 text-sm">Módulo</h3>
+          <p class="text-xl font-bold text-gray-800 mt-1">Productos</p>
+        </div>
+        <div class="bg-white rounded-lg p-6 shadow-sm border">
+          <h3 class="text-gray-500 text-sm">Módulo</h3>
+          <p class="text-xl font-bold text-gray-800 mt-1">Compras</p>
+        </div>
+        <div class="bg-white rounded-lg p-6 shadow-sm border">
+          <h3 class="text-gray-500 text-sm">Módulo</h3>
+          <p class="text-xl font-bold text-gray-800 mt-1">Ventas</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usuarios -->
+    <div *ngIf="seccionActiva === 'usuarios'">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Usuarios</h2>
+      <p class="text-gray-500">Módulo de usuarios en construcción...</p>
+    </div>
+
+    <!-- Productos -->
+    <div *ngIf="seccionActiva === 'productos'">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Productos</h2>
+      <p class="text-gray-500">Módulo de productos en construcción...</p>
+    </div>
+
+    <!-- Compras -->
+    <div *ngIf="seccionActiva === 'compras'">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Compras</h2>
+      <p class="text-gray-500">Módulo de compras en construcción...</p>
+    </div>
+
+    <!-- Ventas -->
+    <div *ngIf="seccionActiva === 'ventas'">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Ventas</h2>
+      <p class="text-gray-500">Módulo de ventas en construcción...</p>
+    </div>
+
+  </div>
+</div>

@@ -5,36 +5,43 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterLink], 
-  templateUrl: './login.html',
-  styleUrl: './login.css'
+  imports: [FormsModule, CommonModule, RouterLink],
+  templateUrl: './register.html'
 })
-export class LoginComponent {
+export class RegisterComponent {
+  nombre = '';
   username = '';
+  email = '';
   password = '';
   error = '';
   loading = false;
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  login() {
+  registrar() {
     this.error = '';
     this.loading = true;
 
-    this.http.post<string>('http://localhost:8080/api/auth/login', {
+    this.http.post('http://localhost:8080/api/usuarios', {
       username: this.username,
+      email: this.email,
       password: this.password
-    }, { responseType: 'text' as 'json' }).subscribe({
-      next: (token) => {
-        localStorage.setItem('token', token);
-        this.router.navigate(['/dashboard']);
+    }).subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
       },
-      error: () => {
-        this.error = 'Usuario o contraseña incorrectos';
+
+      error: (err) => {
+        if (err.status === 500) {
+            this.error = 'El correo o usuario ya está registrado';
+        } else {
+            this.error = 'Error al registrar usuario';
+        }
         this.loading = false;
-      }
+    }
+
     });
   }
 }
