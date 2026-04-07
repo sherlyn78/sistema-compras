@@ -20,6 +20,8 @@ export class RegisterComponent {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+
+rol = 'ADMIN';
   registrar() {
     this.error = '';
     this.loading = true;
