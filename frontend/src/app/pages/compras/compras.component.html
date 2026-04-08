@@ -1,0 +1,58 @@
+<div class="container">
+  <h2>Registro de Compras</h2>
+
+  <div class="form">
+    <select [(ngModel)]="compraActual.proveedor" name="proveedor">
+      <option value="" disabled selected>Seleccione proveedor</option>
+      <option *ngFor="let prov of proveedores" [value]="prov">{{ prov }}</option>
+    </select>
+  </div>
+
+  <h3>Productos disponibles</h3>
+  <div class="productos-disponibles">
+    <button *ngFor="let prod of productosDisponibles" (click)="agregarProducto(prod)">
+      {{ prod.nombre }} (Stock: {{ prod.stock }}) - ${{ prod.precio }}
+    </button>
+  </div>
+
+  <h3>Productos en compra</h3>
+  <table *ngIf="compraActual.productos.length > 0">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Precio</th>
+        <th>Cantidad</th>
+        <th>Subtotal</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let cp of compraActual.productos">
+        <td>{{ cp.producto.nombre }}</td>
+        <td>{{ cp.producto.precio | currency:'USD' }}</td>
+        <td>
+          <input type="number" [value]="cp.cantidad" min="1"
+            (change)="actualizarCantidad(cp, $event.target.valueAsNumber)" />
+        </td>
+        <td>{{ cp.subtotal | currency:'USD' }}</td>
+        <td>
+          <button (click)="eliminarProducto(cp)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 *ngIf="compraActual.productos.length > 0">Total: {{ compraActual.total | currency:'USD' }}</h3>
+
+  <div class="acciones">
+    <button (click)="guardarCompra()" [disabled]="!compraActual.proveedor || compraActual.productos.length === 0">Guardar Compra</button>
+    <button (click)="cancelar()">Cancelar</button>
+  </div>
+
+  <h3>Compras registradas</h3>
+  <ul>
+    <li *ngFor="let c of comprasRegistradas">
+      {{ c.proveedor }} - Total: {{ c.total | currency:'USD' }} - Productos: {{ c.productos.length }}
+    </li>
+  </ul>
+</div>

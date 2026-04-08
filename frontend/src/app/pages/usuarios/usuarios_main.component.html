@@ -1,0 +1,40 @@
+<div class="container">
+  <h2>Módulo de Usuarios</h2>
+
+  <form (ngSubmit)="guardarUsuario()" class="form">
+    <input type="text" placeholder="Nombre" [(ngModel)]="usuarioForm.nombre" name="nombre" required />
+    <input type="email" placeholder="Email" [(ngModel)]="usuarioForm.email" name="email" required />
+    <select [(ngModel)]="usuarioForm.rol" name="rol">
+      <option *ngFor="let rol of roles" [value]="rol">{{ rol }}</option>
+    </select>
+
+    <button type="submit">{{ editando ? 'Actualizar' : 'Registrar' }}</button>
+    <button type="button" (click)="cancelar()" *ngIf="editando">Cancelar</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let usuario of usuarios">
+        <td>{{ usuario.nombre }}</td>
+        <td>{{ usuario.email }}</td>
+        <td>{{ usuario.rol }}</td>
+        <td>
+          <span [class.activo]="usuario.activo" [class.inactivo]="!usuario.activo">
+            {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+        <td>
+          <button (click)="editarUsuario(usuario)">Editar</button>
+          <button (click)="toggleActivo(usuario)">
+            {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

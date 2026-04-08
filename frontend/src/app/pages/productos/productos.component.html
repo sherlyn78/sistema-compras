@@ -1,0 +1,35 @@
+<div class="container">
+  <h2>Módulo de Productos</h2>
+
+  <form (ngSubmit)="guardarProducto()" class="form">
+    <input type="text" placeholder="Nombre" [(ngModel)]="productoForm.nombre" name="nombre" required />
+    <input type="text" placeholder="Descripción" [(ngModel)]="productoForm.descripcion" name="descripcion" />
+    <input type="number" placeholder="Precio" [(ngModel)]="productoForm.precio" name="precio" min="0" required />
+    <input type="number" placeholder="Stock" [(ngModel)]="productoForm.stock" name="stock" min="0" required />
+
+    <button type="submit">{{ editando ? 'Actualizar' : 'Registrar' }}</button>
+    <button type="button" (click)="cancelar()" *ngIf="editando">Cancelar</button>
+  </form>
+
+  <input type="text" placeholder="Buscar productos..." [(ngModel)]="busqueda" class="search" />
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th><th>Descripción</th><th>Precio</th><th>Stock</th><th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let producto of filtrarProductos()">
+        <td>{{ producto.nombre }}</td>
+        <td>{{ producto.descripcion }}</td>
+        <td>{{ producto.precio | currency:'USD' }}</td>
+        <td>{{ producto.stock }}</td>
+        <td>
+          <button (click)="editarProducto(producto)">Editar</button>
+          <button (click)="eliminarProducto(producto)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

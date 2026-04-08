@@ -1,0 +1,26 @@
+.container {
+  max-width: 800px;
+  margin: auto;
+  font-family: Arial, sans-serif;
+}
+
+h2 { text-align: center; }
+
+.form { display: flex; gap: 10px; margin-bottom: 20px; }
+.form input, .form select { padding: 8px; flex: 1; }
+
+button {
+  padding: 8px 12px;
+  cursor: pointer;
+  border: none;
+  background-color: #1976d2;
+  color: white;
+  border-radius: 4px;
+}
+button:hover { background-color: #135ba1; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+
+.activo { color: green; font-weight: bold; }
+.inactivo { color: red; font-weight: bold; }
