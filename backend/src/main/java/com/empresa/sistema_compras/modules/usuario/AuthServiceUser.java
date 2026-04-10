@@ -19,14 +19,18 @@ public class AuthServiceUser {
     private JwtService jwtService;
 
     public String login(String username, String password) {
+    Usuario user = usuarioRepository.findByUsername(username)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Usuario user = usuarioRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Credenciales incorrectas");
-        }
-
-        return jwtService.generateToken(user.getUsername(), "ADMIN");
+    if (!passwordEncoder.matches(password, user.getPassword())) {
+        throw new RuntimeException("Credenciales incorrectas");
     }
+
+    // EXTRAEMOS EL ROL REAL DE LA BASE DE DATOS
+    String nombreRol = user.getRol().getNombre().toUpperCase();
+    
+    String roleForToken = "ROLE_" + nombreRol;
+
+    return jwtService.generateToken(user.getUsername(), roleForToken);
+}
 }

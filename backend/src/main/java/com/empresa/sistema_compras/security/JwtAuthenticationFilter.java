@@ -36,16 +36,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String username = jwtService.extractUsername(token);
                 String role = jwtService.extractRole(token); // Extraemos el rol que guardaste en JwtService
 
+
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    // Creamos la autoridad
+                    // Es vital asegurar que el rol no sea nulo
+                    String finalRole = (role != null) ? role : "VENDEDOR"; 
+                    // admin
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority(finalRole);
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            username, null, Collections.singletonList(new SimpleGrantedAuthority(role)));
-                    
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+                        username, null, Collections.singletonList(authority));
+                        
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+        }
             } catch (Exception e) {
-                // Si el token es inválido
-            }
+                System.out.println("Error validando el token: " + e.getMessage());
+                e.printStackTrace(); //error
+                }
         }
         filterChain.doFilter(request, response);
     }

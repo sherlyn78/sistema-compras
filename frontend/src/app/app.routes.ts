@@ -10,7 +10,7 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'dashboard', component: DashboardComponent },
-  { path: 'dashboard-vendedor', component: DashboardVendedorComponent },
+  { path: 'dashboardvendedor', component: DashboardVendedorComponent },
   { path: '**', redirectTo: 'login' },
   {path: 'no-autorizado',component: NoAutorizadoComponent}
 ];

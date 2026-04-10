@@ -21,31 +21,40 @@ export class LoginComponent {
   constructor(private http: HttpClient, private router: Router) {}
 
   login() {
-    this.error = '';
-    this.loading = true;
+  this.error = '';
+  this.loading = true;
 
-    this.http.post<string>('http://localhost:8080/api/auth/login', {
-      username: this.username,
-      password: this.password
-    }, { responseType: 'text' as 'json' }).subscribe({
-      next: (token) => {
-        localStorage.setItem('token', token);
-        const decoded: any = jwtDecode(token);
-        const role = decoded.role;
+  // Cambiamos <string> por <any> para que nos deje leer el .token
+  this.http.post<any>('http://localhost:8080/api/auth/login', {
+    username: this.username,
+    password: this.password
+  }).subscribe({
+    next: (res) => {
+      this.loading = false;
+      const token = res.token;
+      localStorage.setItem('token', token);
+
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log("Contenido del token:", payload);
+
+    
+      const role = payload.role;
 
 
-//opciones
-        if (role == 'ADMIN'){
-          this.router.navigate(['/dashboard']);
-        }else if (role == 'VENDEDOR'){
-          this.router.navigate(['/dashboard-vendedor']);
-        }
+      if (role === 'ROLE_ADMIN') {
+        this.router.navigate(['/dashboard']);
+      } else if (role === 'ROLE_VENDEDOR' || role === 'ROLE_USER') {
+        this.router.navigate(['/dashboardvendedor']);
+      } else {
+        console.error("Rol no reconocido:", role);
+      }
+
       },
-      //error
-      error: () => {
-        this.error = 'Usuario o contraseña incorrectos';
+      error: (err) => {
         this.loading = false;
+        console.error("Error en login:", err);
+        this.error = 'Credenciales incorrectas';
       }
     });
   }
-}
+  }

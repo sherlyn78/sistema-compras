@@ -58,4 +58,8 @@ cambiamos a import * as jwtDecode from 'jwt-decode';
 
 
 comando para iniciar backend 
+
+
 mvn spring-boot:run -Dspring-boot.run.profiles=local
+
+npm install @ngneat/hot-toast @ngneat/overview para dise;o 
