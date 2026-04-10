@@ -20,8 +20,6 @@ export class RegisterComponent {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-
-rol = 'ADMIN';
   registrar() {
     this.error = '';
     this.loading = true;
@@ -30,6 +28,7 @@ rol = 'ADMIN';
       username: this.username,
       email: this.email,
       password: this.password
+      rol: { nombre: 'VENDEDOR' }//siempre debe ser vendedor
     }).subscribe({
       next: () => {
         this.router.navigate(['/login']);

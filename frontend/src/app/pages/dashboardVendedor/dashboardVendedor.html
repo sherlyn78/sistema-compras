@@ -1,20 +1,16 @@
-<div class="flex h-screen bg-gray-100">
-
-  <!-- Menú lateral -->
-  <div class="w-64 bg-gray-800 text-white flex flex-col">
-    <div class="p-6 border-b border-gray-700">
-      <h1 class="text-lg font-bold">Sistema de Compras</h1>
-    </div>
-
 <div class="min-h-screen bg-gray-50 flex">
 
   <!-- Sidebar -->
   <aside class="w-56 bg-white border-r border-gray-200 flex flex-col">
-    <div class="px-5 py-5 border-b border-gray-100">
-      <p class="text-sm font-medium text-gray-900">{{ usuarioActual.username }}</p>
-      <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Vendedor</span>
+
+    <!-- Header del sidebar -->
+    <div class="px-5 py-5 border-b border-gray-100 bg-gray-800">
+      <h1 class="text-base font-bold text-white mb-3">Sistema de Compras</h1>
+      <p class="text-sm font-medium text-white">{{ usuarioActual.username }}</p>
+      <span class="text-xs px-2 py-0.5 bg-green-500 text-white rounded-full">Vendedor</span>
     </div>
 
+    <!-- Navegación -->
     <nav class="flex-1 px-3 py-4 space-y-1">
       <button (click)="cambiarSeccion('inicio')"
         [class]="seccionActiva === 'inicio'
@@ -36,18 +32,20 @@
       </button>
     </nav>
 
+    <!-- Botón cerrar sesión -->
     <div class="px-3 py-4 border-t border-gray-100">
       <button (click)="cerrarSesion()"
-        class="w-full text-left px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-50">
+        class="w-full text-left px-3 py-2 rounded-md text-sm text-red-600 hover:bg-red-50 font-medium">
         Cerrar sesión
       </button>
     </div>
+
   </aside>
 
   <!-- Contenido principal -->
   <main class="flex-1 p-8 overflow-y-auto">
 
-    <!-- ================== INICIO ================== -->
+    <!-- INICIO -->
     <div *ngIf="seccionActiva === 'inicio'">
       <h2 class="text-2xl font-bold text-gray-800 mb-2">
         Bienvenido, {{ usuarioActual.username }}
@@ -56,139 +54,142 @@
       <div class="grid grid-cols-2 gap-4 max-w-md">
         <div class="bg-white rounded-lg p-5 border border-gray-200">
           <p class="text-sm text-gray-500 mb-1">Ventas registradas</p>
-          <p class="text-3xl font-bold text-gray-800">{{ ventas.length }}</p>
+          <p class="text-3xl font-bold text-blue-600">{{ ventas.length }}</p>
         </div>
         <div class="bg-white rounded-lg p-5 border border-gray-200">
           <p class="text-sm text-gray-500 mb-1">Productos disponibles</p>
-          <p class="text-3xl font-bold text-gray-800">{{ productos.length }}</p>
+          <p class="text-3xl font-bold text-green-600">{{ productos.length }}</p>
         </div>
       </div>
     </div>
 
-    <!-- ================== VENTAS ================== -->
-    <div *ngIf="seccionActiva === 'ventas'">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Ventas</h2>
-        <button (click)="mostrarFormVenta = true; cargarProductos()"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
-          + Nueva venta
+
+    <!-- VENTAS -->
+<div *ngIf="seccionActiva === 'ventas'">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">Ventas</h2>
+    <button (click)="mostrarFormVenta = true; cargarProductos()"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+      + Nueva venta
+    </button>
+  </div>
+
+  <!-- FORMULARIO NUEVA VENTA -->
+  <div *ngIf="mostrarFormVenta" class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4">Nueva venta</h3>
+
+    <!-- Cliente -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
+      <input type="text" [(ngModel)]="nuevaVenta.cliente"
+        placeholder="Nombre del cliente"
+        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+    </div>
+
+    <!-- Productos -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Productos</label>
+
+      <div *ngFor="let d of nuevaVenta.detalles; let i = index"
+        class="grid grid-cols-12 gap-2 mb-2 items-center">
+
+        <!-- Selector de producto -->
+        <select [(ngModel)]="d.productoId"
+          (ngModelChange)="onProductoSeleccionado(i, $event)"
+          class="col-span-5 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Selecciona producto</option>
+          <option *ngFor="let p of productos" [value]="p.id">
+            {{ p.nombre }} — stock: {{ p.cantidadInventario }}
+          </option>
+        </select>
+
+        <!-- Cantidad -->
+        <input type="number" [(ngModel)]="d.cantidad"
+          min="1" [max]="d.stockDisponible"
+          (ngModelChange)="calcularTotal()"
+          placeholder="Cant."
+          class="col-span-2 border border-gray-300 rounded-md px-3 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+
+        <!-- Subtotal -->
+        <span class="col-span-3 text-sm text-gray-600 text-right pr-2">
+          {{ (d.cantidad * d.precioUnitario) | currency:'USD' }}
+        </span>
+
+        <!-- Quitar renglón -->
+        <button (click)="quitarDetalle(i)"
+          class="col-span-2 text-red-500 hover:text-red-700 text-xl font-bold text-center">
+          ×
         </button>
       </div>
 
-      <!-- Formulario nueva venta -->
-      <div *ngIf="mostrarFormVenta" class="bg-white rounded-lg p-6 shadow-sm border mb-6">
-        <h3 class="text-lg font-medium text-gray-800 mb-4">Nueva venta</h3>
-
-        <!-- Cliente -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
-          <input type="text" [(ngModel)]="nuevaVenta.cliente"
-            placeholder="Nombre del cliente"
-            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm
-                   focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-        </div>
-
-        <!-- Renglones de productos -->
-        <div class="mb-3">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Productos</label>
-
-          <div *ngFor="let d of nuevaVenta.detalles; let i = index"
-            class="grid grid-cols-12 gap-2 mb-2 items-center">
-
-            <select [(ngModel)]="d.productoId"
-              (ngModelChange)="onProductoSeleccionado(i, $event)"
-              class="col-span-5 border border-gray-300 rounded-md px-3 py-2 text-sm
-                     focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">Selecciona producto</option>
-              <option *ngFor="let p of productos" [value]="p.id">
-                {{ p.nombre }} (stock: {{ p.cantidadInventario }})
-              </option>
-            </select>
-
-            <input type="number" [(ngModel)]="d.cantidad"
-              min="1" [max]="d.stockDisponible"
-              (ngModelChange)="calcularTotal()"
-              placeholder="Cant."
-              class="col-span-2 border border-gray-300 rounded-md px-3 py-2 text-sm
-                     focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"/>
-
-            <span class="col-span-3 text-sm text-gray-600 text-right">
-              {{ (d.cantidad * d.precioUnitario) | currency:'USD' }}
-            </span>
-
-            <button (click)="quitarDetalle(i)"
-              class="col-span-2 text-red-500 hover:text-red-700 text-xl font-bold text-center">
-              ×
-            </button>
-          </div>
-
-          <button (click)="agregarDetalle()"
-            class="mt-1 text-sm text-blue-600 hover:underline">
-            + Agregar producto
-          </button>
-        </div>
-
-        <!-- Error de stock -->
-        <div *ngIf="errorStock"
-          class="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
-          ⚠️ {{ errorStock }}
-        </div>
-
-        <!-- Total -->
-        <div class="flex justify-end items-center gap-3 py-3 border-t border-gray-100 mb-4">
-          <span class="text-sm text-gray-600">Total:</span>
-          <span class="text-xl font-bold text-gray-900">{{ totalVenta | currency:'USD' }}</span>
-        </div>
-
-        <div class="flex gap-2">
-          <button (click)="registrarVenta()"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
-            Guardar
-          </button>
-          <button (click)="cancelarVenta()"
-            class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm">
-            Cancelar
-          </button>
-        </div>
-      </div>
-
-      <!-- Tabla historial -->
-      <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b">
-            <tr>
-              <th class="text-left px-4 py-3 text-gray-600">#</th>
-              <th class="text-left px-4 py-3 text-gray-600">Cliente</th>
-              <th class="text-left px-4 py-3 text-gray-600">Productos</th>
-              <th class="text-left px-4 py-3 text-gray-600">Fecha</th>
-              <th class="text-left px-4 py-3 text-gray-600">Total</th>
-              <th class="text-left px-4 py-3 text-gray-600">Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let v of ventas" class="border-b hover:bg-gray-50">
-              <td class="px-4 py-3 text-gray-400">{{ v.id }}</td>
-              <td class="px-4 py-3">{{ v.cliente }}</td>
-              <td class="px-4 py-3 text-gray-500">{{ v.detalles?.length }} item(s)</td>
-              <td class="px-4 py-3 text-gray-500">{{ v.fecha | date:'dd/MM/yyyy' }}</td>
-              <td class="px-4 py-3 font-medium">{{ v.total | currency:'USD' }}</td>
-              <td class="px-4 py-3">
-                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
-                  COMPLETADA
-                </span>
-              </td>
-            </tr>
-            <tr *ngIf="ventas.length === 0">
-              <td colspan="6" class="px-4 py-8 text-center text-gray-400">
-                No hay ventas registradas aún
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <button (click)="agregarDetalle()"
+        class="mt-2 text-sm text-blue-600 hover:underline">
+        + Agregar producto
+      </button>
     </div>
 
-    <!-- ================== PRODUCTOS (solo lectura) ================== -->
+    <!-- Error -->
+    <div *ngIf="errorStock"
+      class="mb-4 px-3 py-2 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
+      error: {{ errorStock }}
+    </div>
+
+    <!-- Total -->
+    <div class="flex justify-end items-center gap-3 py-3 border-t border-gray-100 mb-4">
+      <span class="text-sm text-gray-600 font-medium">Total:</span>
+      <span class="text-2xl font-bold text-gray-900">{{ totalVenta | currency:'USD' }}</span>
+    </div>
+
+    <!-- Botones -->
+    <div class="flex gap-2">
+      <button (click)="registrarVenta()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md text-sm font-medium">
+        Guardar venta
+      </button>
+      <button (click)="cancelarVenta()"
+        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-md text-sm">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLA HISTORIAL -->
+  <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b">
+        <tr>
+          <th class="text-left px-4 py-3 text-gray-600">#</th>
+          <th class="text-left px-4 py-3 text-gray-600">Cliente</th>
+          <th class="text-left px-4 py-3 text-gray-600">Items</th>
+          <th class="text-left px-4 py-3 text-gray-600">Fecha</th>
+          <th class="text-left px-4 py-3 text-gray-600">Total</th>
+          <th class="text-left px-4 py-3 text-gray-600">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of ventas" class="border-b hover:bg-gray-50">
+          <td class="px-4 py-3 text-gray-400">{{ v.id }}</td>
+          <td class="px-4 py-3 font-medium">{{ v.cliente }}</td>
+          <td class="px-4 py-3 text-gray-500">{{ v.detalles?.length }} item(s)</td>
+          <td class="px-4 py-3 text-gray-500">{{ v.fecha | date:'dd/MM/yyyy' }}</td>
+          <td class="px-4 py-3 font-semibold">{{ v.total | currency:'USD' }}</td>
+          <td class="px-4 py-3">
+            <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium">
+              COMPLETADA
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="ventas.length === 0">
+          <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+            No hay ventas registradas aún
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+    <!-- PRODUCTOS -->
     <div *ngIf="seccionActiva === 'productos'">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">Productos</h2>
       <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -197,7 +198,7 @@
             <tr>
               <th class="text-left px-4 py-3 text-gray-600">Nombre</th>
               <th class="text-left px-4 py-3 text-gray-600">Descripción</th>
-              <th class="text-left px-4 py-3 text-gray-600">Precio Venta</th>
+              <th class="text-left px-4 py-3 text-gray-600">Precio</th>
               <th class="text-left px-4 py-3 text-gray-600">Stock</th>
               <th class="text-left px-4 py-3 text-gray-600">Estado</th>
             </tr>
@@ -215,10 +216,8 @@
                   : 'text-gray-700'">
                   {{ p.cantidadInventario }}
                 </span>
-                <span *ngIf="p.cantidadInventario <= 5 && p.cantidadInventario > 0"
-                  class="ml-1 text-xs text-yellow-500">bajo</span>
-                <span *ngIf="p.cantidadInventario === 0"
-                  class="ml-1 text-xs text-red-500">agotado</span>
+                <span *ngIf="p.cantidadInventario === 0" class="ml-1 text-xs text-red-500">agotado</span>
+                <span *ngIf="p.cantidadInventario > 0 && p.cantidadInventario <= 5" class="ml-1 text-xs text-yellow-500">bajo</span>
               </td>
               <td class="px-4 py-3">
                 <span [class]="p.estado === 'ACTIVO'

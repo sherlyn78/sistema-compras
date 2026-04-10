@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,22 +15,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class DashboardVendedorComponent implements OnInit {
 
   private apiUrl = 'http://localhost:8080/api';
-
-  // Secciones
   seccionActiva = 'inicio';
-
-  // Usuario actual
   usuarioActual = { username: '' };
-
-  // Productos
   productos: any[] = [];
-
-  // Ventas
   ventas: any[] = [];
   mostrarFormVenta = false;
   errorStock = '';
   totalVenta = 0;
-
   nuevaVenta = {
     cliente: '',
     detalles: [] as {
@@ -41,10 +33,16 @@ export class DashboardVendedorComponent implements OnInit {
     }[]
   };
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   ngOnInit() {
-    // Leer token y verificar rol
+    // ✅ Solo corre en el navegador
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const token = localStorage.getItem('token');
     if (!token) {
       this.router.navigate(['/login']);
@@ -52,36 +50,32 @@ export class DashboardVendedorComponent implements OnInit {
     }
 
     const payload = JSON.parse(atob(token.split('.')[1]));
+    console.log('Token completo:', JSON.stringify(payload));
     this.usuarioActual.username = payload.sub;
 
-    // ✅ GUARD DE ROL: si es admin, redirigir a su dashboard
-    const rol = payload.rol || payload.role || payload.roles?.[0];
+    const rol = payload.rol || payload.role || payload.roles?.[0] || payload.authorities?.[0];
     if (rol === 'admin' || rol === 'ADMIN' || rol === 'ROLE_ADMIN') {
       this.router.navigate(['/admin/dashboard']);
       return;
     }
 
-    // Si es vendedor, cargar sus datos
     this.cargarProductos();
     this.cargarVentas();
   }
 
-  // Headers con token JWT
   getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
+    const token = isPlatformBrowser(this.platformId)
+      ? localStorage.getItem('token')
+      : null;
     return new HttpHeaders({ 'Authorization': `Bearer ${token}` });
   }
 
-  // Cambiar sección
   cambiarSeccion(seccion: string) {
     this.seccionActiva = seccion;
     if (seccion === 'productos') this.cargarProductos();
-    if (seccion === 'ventas')   { this.cargarProductos(); this.cargarVentas(); }
+    if (seccion === 'ventas') { this.cargarProductos(); this.cargarVentas(); }
   }
 
-  // =======================
-  // PRODUCTOS (solo lectura)
-  // =======================
   cargarProductos() {
     this.http.get<any[]>(`${this.apiUrl}/productos`, { headers: this.getHeaders() })
       .subscribe({
@@ -90,9 +84,6 @@ export class DashboardVendedorComponent implements OnInit {
       });
   }
 
-  // =======================
-  // VENTAS
-  // =======================
   cargarVentas() {
     this.http.get<any[]>(`${this.apiUrl}/ventas`, { headers: this.getHeaders() })
       .subscribe({
@@ -141,8 +132,6 @@ export class DashboardVendedorComponent implements OnInit {
       this.errorStock = 'Agrega al menos un producto.';
       return;
     }
-
-    // Validar stock antes de enviar
     for (const d of this.nuevaVenta.detalles) {
       if (!d.productoId) {
         this.errorStock = 'Selecciona un producto en todos los renglones.';
@@ -162,23 +151,23 @@ export class DashboardVendedorComponent implements OnInit {
       cliente: this.nuevaVenta.cliente,
       total:   this.totalVenta,
       detalles: this.nuevaVenta.detalles.map(d => ({
-        productoId:     d.productoId,
+        producto: { id: d.productoId },
         cantidad:       d.cantidad,
         precioUnitario: d.precioUnitario,
         subtotal:       d.cantidad * d.precioUnitario
       }))
     };
 
-    // HTTP directo, sin servicio externo
     this.http.post(`${this.apiUrl}/ventas`, payload, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
           this.cancelarVenta();
           this.cargarVentas();
-          this.cargarProductos(); // refresca stock visible
+          this.cargarProductos();
         },
-        error: () => {
-          this.errorStock = 'Error al registrar la venta. Intenta de nuevo.';
+        error: (err) => {
+          console.error('Error completo:', err);
+          this.errorStock = `Error ${err.status}: ${err.error?.message || 'Intenta de nuevo'}`;
         }
       });
   }
@@ -190,11 +179,10 @@ export class DashboardVendedorComponent implements OnInit {
     this.nuevaVenta = { cliente: '', detalles: [] };
   }
 
-  // =======================
-  // SESIÓN
-  // =======================
   cerrarSesion() {
-    localStorage.removeItem('token');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('token');
+    }
     this.router.navigate(['/login']);
   }
 }

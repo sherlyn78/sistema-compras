@@ -1,7 +1,15 @@
 package com.empresa.sistema_compras.modules.venta;
 
 import com.empresa.sistema_compras.modules.producto.Producto;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "detalle_venta")
@@ -13,6 +21,7 @@ public class DetalleVenta {
 
     @ManyToOne
     @JoinColumn(name = "venta_id")
+    @JsonBackReference
     private Venta venta;
 
     @ManyToOne

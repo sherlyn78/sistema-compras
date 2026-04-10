@@ -16,6 +16,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.empresa.sistema_compras.security.JwtAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -34,12 +35,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/ventas").permitAll()
-
+                .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                 .requestMatchers("/api/usuarios/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/api/ventas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_VENDEDOR", "ROLE_USER")
                 .requestMatchers("/api/productos/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_VENDEDOR", "ROLE_USER")
     
+
+                .requestMatchers(HttpMethod.GET,  "/api/ventas").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/ventas").hasAnyAuthority("ROLE_ADMIN", "ROLE_VENDEDOR")
+
                 .anyRequest().authenticated() // Todo lo demás requiere token
             )
             // filtro

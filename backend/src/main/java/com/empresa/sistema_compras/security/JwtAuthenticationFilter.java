@@ -38,10 +38,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    // Es vital asegurar que el rol no sea nulo
-                    String finalRole = (role != null) ? role : "VENDEDOR"; 
+                    String finalRole = (role != null) ? role : "ROLE_VENDEDOR";
+                    System.out.println(">>> Usuario: " + username + " | Rol asignado: " + finalRole);
+
                     // admin
                     SimpleGrantedAuthority authority = new SimpleGrantedAuthority(finalRole);
+
+
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         username, null, Collections.singletonList(authority));
                         
