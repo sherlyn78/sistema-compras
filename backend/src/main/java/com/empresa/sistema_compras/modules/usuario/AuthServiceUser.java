@@ -25,6 +25,10 @@ public class AuthServiceUser {
     if (!passwordEncoder.matches(password, user.getPassword())) {
         throw new RuntimeException("Credenciales incorrectas");
     }
+//valida usuario activo
+    if (!"ACTIVO".equals(user.getStatus())) {
+        throw new RuntimeException("Usuario inactivo. Contacta al administrador.");
+    }
 
     // EXTRAEMOS EL ROL REAL DE LA BASE DE DATOS
     String nombreRol = user.getRol().getNombre().toUpperCase();

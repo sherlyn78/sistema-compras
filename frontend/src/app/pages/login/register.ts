@@ -27,8 +27,8 @@ export class RegisterComponent {
     this.http.post('http://localhost:8080/api/usuarios', {
       username: this.username,
       email: this.email,
-      password: this.password
-      rol: { nombre: 'VENDEDOR' }//siempre debe ser vendedor
+      password: this.password,
+      rol: { nombre: 'VENDEDOR' }
     }).subscribe({
       next: () => {
         this.router.navigate(['/login']);

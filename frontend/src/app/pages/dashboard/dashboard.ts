@@ -191,6 +191,34 @@ this.http.get<any[]>('http://localhost:8080/api/usuarios', { headers: this.getHe
   }
 
 
+  //desactivar y activar usuariso
+  toggleEstado(usuario: any) {
+  const nuevoEstado = usuario.status === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+  
+  const datos = {
+    username: usuario.username,
+    email: usuario.email,
+    password: '',
+    rol: { nombre: usuario.rol?.nombre },
+    status: nuevoEstado
+  };
+  
+  console.log('Enviando:', JSON.stringify(datos));
+
+  this.http.put(`http://localhost:8080/api/usuarios/${usuario.id}`, datos, { headers: this.getHeaders() })
+  .subscribe({
+    next: (res) => {
+      console.log('Respuesta:', JSON.stringify(res));
+      usuario.status = nuevoEstado;
+      this.cargarUsuarios(); //refrescar la tabla
+    },
+    error: (err) => {
+      console.error('Error:', err);
+      alert('Error al cambiar estado del usuario');
+    }
+  });
+}
+
   
 
   // =======================

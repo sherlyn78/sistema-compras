@@ -30,7 +30,7 @@ public class Usuario {
     @Column(nullable = false)
     private String password;
 
-    @ManyToOne(fetch = jakarta.persistence.FetchType.EAGER) // Asegura que el rol siempre venga incluido
+    @ManyToOne(fetch = jakarta.persistence.FetchType.EAGER)
     @JoinColumn(name = "rol_id")
     private Rol rol;
 

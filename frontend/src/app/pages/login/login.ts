@@ -50,11 +50,13 @@ export class LoginComponent {
       }
 
       },
+      
       error: (err) => {
-        this.loading = false;
-        console.error("Error en login:", err);
-        this.error = 'Credenciales incorrectas';
-      }
+      this.loading = false;
+      this.error = typeof err.error === 'string'
+        ? err.error.replace(/"/g, '')
+        : err.error?.message || 'Credenciales incorrectas';
+    }
     });
   }
   }

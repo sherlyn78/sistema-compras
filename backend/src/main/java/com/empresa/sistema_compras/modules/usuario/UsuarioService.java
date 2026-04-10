@@ -51,12 +51,18 @@ if (usuario.getRol() != null && usuario.getRol().getNombre() != null) {
         u.setUsername(datosNuevos.getUsername());
         u.setEmail(datosNuevos.getEmail());
         
-        // Actualizar Rol correctamente buscando el objeto en la BD
+        // Actualizar Rol
         if (datosNuevos.getRol() != null && datosNuevos.getRol().getNombre() != null) {
             Rol rolEncontrado = rolRepository.findByNombre(datosNuevos.getRol().getNombre());
             if (rolEncontrado != null) {
                 u.setRol(rolEncontrado);
             }
+        }
+
+
+    //guarda status
+        if (datosNuevos.getStatus() != null && !datosNuevos.getStatus().isEmpty()) {
+            u.setStatus(datosNuevos.getStatus());
         }
 
         if (datosNuevos.getPassword() != null && !datosNuevos.getPassword().isEmpty()) {

@@ -99,6 +99,7 @@
           <th class="p-4">Usuario</th>
           <th class="p-4">Email</th>
           <th class="p-4">Rol</th>
+          <th class="p-4">Estado</th>
           <th class="p-4">Acciones</th>
         </tr>
       </thead>
@@ -113,8 +114,13 @@
           </td>
           <td class="p-4 flex gap-2">
             <button (click)="prepararEdicion(u)" class="text-blue-600">Editar</button>
+            <button (click)="toggleEstado(u)" [class]="u.status === 'ACTIVO' ? 'text-yellow-600 hover:text-yellow-800' : 'text-green-600 hover:text-green-800'">{{ u.status === 'ACTIVO' ? 'Desactivar' : 'Activar' }}</button>
             <button (click)="eliminarUsuario(u.id)" class="text-red-600">Eliminar</button>
           </td>
+          <td class="p-4">
+            <span [class]="u.status === 'ACTIVO' ? 'bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold': 'bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold'">{{ u.status }}
+            </span>
+</td>
         </tr>
       </tbody>
     </table>
