@@ -46,3 +46,16 @@ git pull origin main
 git checkout tu-rama
 git merge main
 
+
+para redirigir el rol
+npm install jwt-decode
+
+npm install jwt-decode
+para poder usar 
+import jwtDecode from 'jwt-decode';
+
+cambiamos a import * as jwtDecode from 'jwt-decode';
+
+
+comando para iniciar backend 
+mvn spring-boot:run -Dspring-boot.run.profiles=local

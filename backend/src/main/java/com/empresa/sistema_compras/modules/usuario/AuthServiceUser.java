@@ -27,6 +27,6 @@ public class AuthServiceUser {
             throw new RuntimeException("Credenciales incorrectas");
         }
 
-        return jwtService.generateToken(user.getUsername());
+        return jwtService.generateToken(user.getUsername(), "ADMIN");
     }
 }
