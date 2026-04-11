@@ -14,6 +14,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class DashboardVendedorComponent implements OnInit {
 
+  fechaActual: string = '';
+
   private apiUrl = 'http://localhost:8080/api';
   seccionActiva = 'inicio';
   usuarioActual = { username: '' };
@@ -42,7 +44,7 @@ export class DashboardVendedorComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // ✅ Solo corre en el navegador
+    // Solo corre en el navegador
     if (!isPlatformBrowser(this.platformId)) return;
 
     const token = localStorage.getItem('token');
@@ -63,6 +65,17 @@ export class DashboardVendedorComponent implements OnInit {
 
     this.cargarProductos();
     this.cargarVentas();
+    this.obtenerFecha();
+  }
+
+  obtenerFecha() {
+    const opciones: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    this.fechaActual = new Date().toLocaleDateString('es-ES', opciones);
   }
 
   getHeaders(): HttpHeaders {
