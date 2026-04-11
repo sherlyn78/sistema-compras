@@ -33,6 +33,8 @@ export class DashboardVendedorComponent implements OnInit {
     }[]
   };
 
+  ventaSeleccionada: any = null;
+
   constructor(
     private router: Router,
     private http: HttpClient,
@@ -177,6 +179,10 @@ export class DashboardVendedorComponent implements OnInit {
     this.errorStock = '';
     this.totalVenta = 0;
     this.nuevaVenta = { cliente: '', detalles: [] };
+  }
+
+  verDetalle(venta: any) {
+  this.ventaSeleccionada = this.ventaSeleccionada?.id === venta.id ? null : venta;
   }
 
   cerrarSesion() {

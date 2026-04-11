@@ -56,6 +56,23 @@ export class DashboardComponent implements OnInit {
   }[]
 };
 
+
+// Ventas
+ventas: any[] = [];
+mostrarFormVenta = false;
+errorStock = '';
+totalVenta = 0;
+nuevaVenta = {
+  cliente: '',
+  detalles: [] as {
+    productoId: any;
+    nombreProducto: string;
+    cantidad: number;
+    precioUnitario: number;
+    stockDisponible: number;
+  }[]
+};
+
   constructor(private router: Router, private http: HttpClient,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -91,6 +108,8 @@ export class DashboardComponent implements OnInit {
     this.seccionActiva = seccion;
     if (seccion === 'usuarios') this.cargarUsuarios();
     if (seccion === 'productos') this.cargarProductos();
+    if (seccion === 'compras') { this.cargarCompras(); this.cargarProductos(); }
+    if (seccion === 'ventas') { this.cargarVentas(); this.cargarProductos(); }
   }
 
   // =======================
@@ -396,6 +415,102 @@ cancelarCompra() {
   this.errorCompra = '';
   this.totalCompra = 0;
   this.nuevaCompra = { proveedor: '', detalles: [] };
+}
+
+
+//ventas
+cargarVentas() {
+  this.http.get<any[]>('http://localhost:8080/api/ventas', { headers: this.getHeaders() })
+    .subscribe({
+      next: (data) => this.ventas = data,
+      error: () => console.error('Error cargando ventas')
+    });
+}
+
+agregarDetalle() {
+  this.nuevaVenta.detalles.push({
+    productoId: '',
+    nombreProducto: '',
+    cantidad: 1,
+    precioUnitario: 0,
+    stockDisponible: 0
+  });
+}
+
+onProductoSeleccionado(index: number, productoId: any) {
+  const producto = this.productos.find(p => p.id == productoId);
+  if (!producto) return;
+  this.nuevaVenta.detalles[index].nombreProducto  = producto.nombre;
+  this.nuevaVenta.detalles[index].precioUnitario  = producto.precioVenta;
+  this.nuevaVenta.detalles[index].stockDisponible = producto.cantidadInventario;
+  this.calcularTotal();
+}
+
+quitarDetalle(index: number) {
+  this.nuevaVenta.detalles.splice(index, 1);
+  this.calcularTotal();
+}
+
+calcularTotal() {
+  this.totalVenta = this.nuevaVenta.detalles
+    .reduce((sum, d) => sum + d.cantidad * d.precioUnitario, 0);
+}
+
+registrarVenta() {
+  this.errorStock = '';
+
+  if (!this.nuevaVenta.cliente.trim()) {
+    this.errorStock = 'Ingresa el nombre del cliente.';
+    return;
+  }
+  if (this.nuevaVenta.detalles.length === 0) {
+    this.errorStock = 'Agrega al menos un producto.';
+    return;
+  }
+  for (const d of this.nuevaVenta.detalles) {
+    if (!d.productoId) {
+      this.errorStock = 'Selecciona un producto en todos los renglones.';
+      return;
+    }
+    if (d.cantidad <= 0) {
+      this.errorStock = 'La cantidad debe ser mayor a 0.';
+      return;
+    }
+    if (d.cantidad > d.stockDisponible) {
+      this.errorStock = `"${d.nombreProducto}" solo tiene ${d.stockDisponible} unidades disponibles.`;
+      return;
+    }
+  }
+
+  const payload = {
+    cliente: this.nuevaVenta.cliente,
+    total: this.totalVenta,
+    detalles: this.nuevaVenta.detalles.map(d => ({
+      producto: { id: d.productoId },
+      cantidad: d.cantidad,
+      precioUnitario: d.precioUnitario,
+      subtotal: d.cantidad * d.precioUnitario
+    }))
+  };
+
+  this.http.post('http://localhost:8080/api/ventas', payload, { headers: this.getHeaders() })
+    .subscribe({
+      next: () => {
+        this.cancelarVenta();
+        this.cargarVentas();
+        this.cargarProductos();
+      },
+      error: (err) => {
+        this.errorStock = `Error ${err.status}: ${err.error?.message || 'Intenta de nuevo'}`;
+      }
+    });
+}
+
+cancelarVenta() {
+  this.mostrarFormVenta = false;
+  this.errorStock = '';
+  this.totalVenta = 0;
+  this.nuevaVenta = { cliente: '', detalles: [] };
 }
 
 
