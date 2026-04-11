@@ -218,14 +218,22 @@ nuevaVenta = {
 }
 
   eliminarUsuario(id: number) {
-    if (confirm('¿Eliminar este usuario?')) {
-      this.http.delete(`http://localhost:8080/api/usuarios/${id}`, { headers: this.getHeaders() })
-        .subscribe({
-          next: () => this.cargarUsuarios(),
-          error: () => alert('Error al eliminar usuario')
-        });
-    }
+  if (confirm('¿Estás seguro de eliminar este usuario?')) {
+    this.http.delete(`http://localhost:8080/api/usuarios/${id}`, { headers: this.getHeaders() })
+      .subscribe({
+        next: () => {
+          // Filtrar la lista localmente
+          this.usuarios = this.usuarios.filter(u => u.id !== id);
+          this.cdr.detectChanges(); // Forzar detección de cambios
+          alert('Usuario eliminado correctamente');
+        },
+        error: (err) => {
+          console.error('Error al eliminar:', err);
+          alert('No se pudo eliminar el usuario. Puede que tenga registros vinculados.');
+        }
+      });
   }
+}
 
 
   //desactivar y activar usuariso
@@ -314,13 +322,24 @@ guardarEdicionProducto() {
   }
 
   eliminarProducto(id: number) {
-  if (confirm('¿Eliminar este producto?')) {
+  if (confirm('¿Eliminar este producto? Esta acción no se puede deshacer.')) {
     this.http.delete(`http://localhost:8080/api/productos/${id}`, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
+          // Actualizamos la lista local
           this.productos = this.productos.filter(p => p.id !== id);
+          this.cdr.detectChanges();
+          alert('Producto eliminado');
         },
-        error: () => alert('Error al eliminar producto')
+        error: (err) => {
+          console.error('Error al eliminar producto:', err);
+          // Mensaje
+          if (err.status === 500) {
+            alert('No se puede eliminar: El producto ya tiene movimientos de compra o venta asociados.');
+          } else {
+            alert('Error al intentar eliminar el producto.');
+          }
+        }
       });
   }
 }
