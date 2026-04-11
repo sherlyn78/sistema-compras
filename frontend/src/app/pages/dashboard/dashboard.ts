@@ -29,6 +29,8 @@ export class DashboardComponent implements OnInit {
   // Productos
   mostrarFormProducto = false;
   productos: any[] = [];
+  productoEditando: any = null;
+  busqueda = '';
   nuevoProducto = {
     nombre: '',
     descripcion: '',
@@ -36,7 +38,23 @@ export class DashboardComponent implements OnInit {
     precioVenta: 0,
     cantidadInventario: 0,
     estado: 'ACTIVO'
+    
   };
+
+  //compras
+  compras: any[] = [];
+  mostrarFormCompra = false;
+  errorCompra = '';
+  totalCompra = 0;
+  nuevaCompra = {
+  proveedor: '',
+  detalles: [] as {
+    productoId: any;
+    nombreProducto: string;
+    cantidad: number;
+    precioUnitario: number;
+  }[]
+};
 
   constructor(private router: Router, private http: HttpClient,
     private cdr: ChangeDetectorRef,
@@ -79,7 +97,7 @@ export class DashboardComponent implements OnInit {
   // USUARIOS ADMIN
   // =======================
   cargarUsuarios() {
-this.http.get<any[]>('http://localhost:8080/api/usuarios', { headers: this.getHeaders() })
+    this.http.get<any[]>('http://localhost:8080/api/usuarios', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
           this.usuarios = [...data]; // Usamos el operador spread para crear una nueva referencia y que Angular detecte el cambio
@@ -224,6 +242,38 @@ this.http.get<any[]>('http://localhost:8080/api/usuarios', { headers: this.getHe
   // =======================
   // PRODUCTOS
   // =======================
+
+  get productosFiltrados() {
+  if (!this.busqueda.trim()) return this.productos;
+  const q = this.busqueda.toLowerCase();
+  return this.productos.filter(p =>
+    p.nombre?.toLowerCase().includes(q) ||
+    p.descripcion?.toLowerCase().includes(q)
+  );
+}
+
+prepararEdicionProducto(producto: any) {
+  this.productoEditando = { ...producto };
+  this.mostrarFormProducto = false;
+}
+
+cancelarEdicionProducto() {
+  this.productoEditando = null;
+}
+
+guardarEdicionProducto() {
+  this.http.put(`http://localhost:8080/api/productos/${this.productoEditando.id}`,
+    this.productoEditando, { headers: this.getHeaders() })
+  .subscribe({
+    next: () => {
+      this.productoEditando = null;
+      this.cargarProductos();
+    },
+    error: () => alert('Error al actualizar producto')
+  });
+}
+
+
   cargarProductos() {
     this.http.get<any[]>('http://localhost:8080/api/productos', { headers: this.getHeaders() })
       .subscribe({
@@ -245,14 +295,109 @@ this.http.get<any[]>('http://localhost:8080/api/usuarios', { headers: this.getHe
   }
 
   eliminarProducto(id: number) {
-    if (confirm('¿Eliminar este producto?')) {
-      this.http.delete(`http://localhost:8080/api/productos/${id}`, { headers: this.getHeaders() })
-        .subscribe({
-          next: () => this.cargarProductos(),
-          error: () => alert('Error al eliminar producto')
-        });
+  if (confirm('¿Eliminar este producto?')) {
+    this.http.delete(`http://localhost:8080/api/productos/${id}`, { headers: this.getHeaders() })
+      .subscribe({
+        next: () => {
+          this.productos = this.productos.filter(p => p.id !== id);
+        },
+        error: () => alert('Error al eliminar producto')
+      });
+  }
+}
+
+    // =======================
+    // Compras
+    // =======================
+  
+  cargarCompras() {
+  this.http.get<any[]>('http://localhost:8080/api/compras', { headers: this.getHeaders() })
+    .subscribe({
+      next: (data) => this.compras = data,
+      error: () => console.error('Error cargando compras')
+    });
+}
+
+agregarDetalleCompra() {
+  this.nuevaCompra.detalles.push({
+    productoId: '',
+    nombreProducto: '',
+    cantidad: 1,
+    precioUnitario: 0
+  });
+}
+
+onProductoCompraSeleccionado(index: number, productoId: any) {
+  const producto = this.productos.find(p => p.id == productoId);
+  if (!producto) return;
+  this.nuevaCompra.detalles[index].nombreProducto = producto.nombre;
+  this.nuevaCompra.detalles[index].precioUnitario = producto.precioCompra;
+  this.calcularTotalCompra();
+}
+
+quitarDetalleCompra(index: number) {
+  this.nuevaCompra.detalles.splice(index, 1);
+  this.calcularTotalCompra();
+}
+
+calcularTotalCompra() {
+  this.totalCompra = this.nuevaCompra.detalles
+    .reduce((sum, d) => sum + d.cantidad * d.precioUnitario, 0);
+}
+
+registrarCompra() {
+  this.errorCompra = '';
+
+  if (!this.nuevaCompra.proveedor.trim()) {
+    this.errorCompra = 'Ingresa el nombre del proveedor.';
+    return;
+  }
+  if (this.nuevaCompra.detalles.length === 0) {
+    this.errorCompra = 'Agrega al menos un producto.';
+    return;
+  }
+  for (const d of this.nuevaCompra.detalles) {
+    if (!d.productoId) {
+      this.errorCompra = 'Selecciona un producto en todos los renglones.';
+      return;
+    }
+    if (d.cantidad <= 0) {
+      this.errorCompra = 'La cantidad debe ser mayor a 0.';
+      return;
     }
   }
+
+  const payload = {
+    proveedor: this.nuevaCompra.proveedor,
+    total: this.totalCompra,
+    detalles: this.nuevaCompra.detalles.map(d => ({
+      producto: { id: d.productoId },
+      cantidad: d.cantidad,
+      precioUnitario: d.precioUnitario,
+      subtotal: d.cantidad * d.precioUnitario
+    }))
+  };
+
+  this.http.post('http://localhost:8080/api/compras', payload, { headers: this.getHeaders() })
+    .subscribe({
+      next: () => {
+        this.cancelarCompra();
+        this.cargarCompras();
+        this.cargarProductos(); // refresca stock
+      },
+      error: (err) => {
+        this.errorCompra = `Error ${err.status}: ${err.error?.message || 'Intenta de nuevo'}`;
+      }
+    });
+}
+
+cancelarCompra() {
+  this.mostrarFormCompra = false;
+  this.errorCompra = '';
+  this.totalCompra = 0;
+  this.nuevaCompra = { proveedor: '', detalles: [] };
+}
+
 
   // =======================
   // SESIÓN

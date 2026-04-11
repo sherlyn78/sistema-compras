@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                 .requestMatchers("/api/usuarios/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/api/productos/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_VENDEDOR", "ROLE_USER")
-    
+                .requestMatchers("/api/compras/**").hasAuthority("ROLE_ADMIN")
 
                 .requestMatchers(HttpMethod.GET,  "/api/ventas").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/ventas").hasAnyAuthority("ROLE_ADMIN", "ROLE_VENDEDOR")

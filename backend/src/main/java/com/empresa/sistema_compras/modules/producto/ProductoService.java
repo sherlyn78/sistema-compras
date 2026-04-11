@@ -1,8 +1,9 @@
 package com.empresa.sistema_compras.modules.producto;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 public class ProductoService {
@@ -29,6 +30,7 @@ public class ProductoService {
         producto.setDescripcion(datos.getDescripcion());
         producto.setPrecioCompra(datos.getPrecioCompra());
         producto.setPrecioVenta(datos.getPrecioVenta());
+        producto.setCantidadInventario(datos.getCantidadInventario());
         producto.setEstado(datos.getEstado());
         return productoRepository.save(producto);
     }
